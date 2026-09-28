@@ -8,6 +8,10 @@ interface Props {
   emptyText: string
   onStatus?: (p: Convertido, s: Status) => void
   onRemove?: (p: Convertido) => void
+  /** Só o dono do registro pode alterar status ou remover. */
+  canEdit?: (p: Convertido) => boolean
+  /** Quando informado, mostra quem registrou cada pessoa. */
+  ownerName?: (p: Convertido) => string
 }
 
 const dash = <span className="text-muted">—</span>
@@ -50,7 +54,7 @@ function RemoveButton({ onConfirm }: { onConfirm: () => void }) {
   )
 }
 
-export function PeopleTable({ people, emptyText, onStatus, onRemove }: Props) {
+export function PeopleTable({ people, emptyText, onStatus, onRemove, canEdit = () => true, ownerName }: Props) {
   if (people.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-line px-6 py-12 text-center text-sm text-muted">{emptyText}</div>
@@ -58,7 +62,7 @@ export function PeopleTable({ people, emptyText, onStatus, onRemove }: Props) {
   }
 
   const status = (p: Convertido) =>
-    onStatus ? <StatusSelect status={p.status} onChange={(s) => onStatus(p, s)} /> : <StatusBadge status={p.status} />
+    onStatus && canEdit(p) ? <StatusSelect status={p.status} onChange={(s) => onStatus(p, s)} /> : <StatusBadge status={p.status} />
 
   return (
     <>
@@ -71,7 +75,7 @@ export function PeopleTable({ people, emptyText, onStatus, onRemove }: Props) {
                 <p className="truncate font-medium">{p.nome}</p>
                 <p className="truncate text-sm text-ink-2">{[p.cargo, p.empresa].filter(Boolean).join(' · ') || dash}</p>
               </div>
-              {onRemove && <RemoveButton onConfirm={() => onRemove(p)} />}
+              {onRemove && canEdit(p) && <RemoveButton onConfirm={() => onRemove(p)} />}
             </div>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
               <div>
@@ -86,6 +90,12 @@ export function PeopleTable({ people, emptyText, onStatus, onRemove }: Props) {
                 <dt className="sr-only">Status</dt>
                 <dd>{status(p)}</dd>
               </div>
+              {ownerName && (
+                <div className="col-span-2">
+                  <dt className="font-mono text-[10px] uppercase tracking-wider text-muted">Registrado por</dt>
+                  <dd className="text-ink-2">{ownerName(p)}</dd>
+                </div>
+              )}
               {p.observacoes && (
                 <div className="col-span-2">
                   <dt className="font-mono text-[10px] uppercase tracking-wider text-muted">Observações</dt>
@@ -109,6 +119,7 @@ export function PeopleTable({ people, emptyText, onStatus, onRemove }: Props) {
               <th className="whitespace-nowrap px-4 py-3 font-medium">Dia do workshop</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Observações</th>
+              {ownerName && <th className="whitespace-nowrap px-4 py-3 font-medium">Registrado por</th>}
               {onRemove && (
                 <th className="w-12 px-2 py-3">
                   <span className="sr-only">Ações</span>
@@ -130,9 +141,10 @@ export function PeopleTable({ people, emptyText, onStatus, onRemove }: Props) {
                     {val(p.observacoes)}
                   </span>
                 </td>
+                {ownerName && <td className="whitespace-nowrap px-4 py-3 text-ink-2">{ownerName(p)}</td>}
                 {onRemove && (
                   <td className="px-2 py-2 text-right">
-                    <RemoveButton onConfirm={() => onRemove(p)} />
+                    {canEdit(p) && <RemoveButton onConfirm={() => onRemove(p)} />}
                   </td>
                 )}
               </tr>

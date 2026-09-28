@@ -1,12 +1,14 @@
 import { PeopleTable } from '../components/PeopleTable'
 import { formatShort, todayStr, weekdayShort } from '../lib/dates'
 import type { DayStats } from '../lib/stats'
+import type { Convertido } from '../lib/types'
 
 interface Props {
   day: string
   stats: DayStats
   recentDays: string[]
   onPick: (day: string) => void
+  ownerName?: (p: Convertido) => string
 }
 
 function Mini({ label, value }: { label: string; value: number }) {
@@ -18,7 +20,7 @@ function Mini({ label, value }: { label: string; value: number }) {
   )
 }
 
-export function Datas({ day, stats, recentDays, onPick }: Props) {
+export function Datas({ day, stats, recentDays, onPick, ownerName }: Props) {
   const today = todayStr()
   const thisYear = today.slice(0, 4)
 
@@ -35,7 +37,7 @@ export function Datas({ day, stats, recentDays, onPick }: Props) {
           Pessoas registradas neste dia{' '}
           <span className="font-mono text-sm font-medium text-muted tabular">{stats.pessoas.length}</span>
         </h3>
-        <PeopleTable people={[...stats.pessoas].reverse()} emptyText="Nenhuma pessoa registrada neste dia." />
+        <PeopleTable people={[...stats.pessoas].reverse()} emptyText="Nenhuma pessoa registrada neste dia." ownerName={ownerName} />
       </section>
 
       <section className="space-y-3">

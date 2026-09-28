@@ -1,12 +1,14 @@
 import { useCallback, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { createdAtForDay, dayOf } from '../lib/dates'
-import type { Chamada, Convertido, NovoConvertido, Status, TipoChamada } from '../lib/types'
+import type { Chamada, Convertido, NovoConvertido, Perfil, Status, TipoChamada } from '../lib/types'
 import { useRealtimeTable } from './useRealtimeTable'
 
-export function useData() {
+/** Todos leem os dados da equipe; inserções vão para `userId` (default auth.uid() no banco). */
+export function useData(userId: string) {
   const chamadas = useRealtimeTable<Chamada>('chamadas')
   const pessoas = useRealtimeTable<Convertido>('convertidos')
+  const perfis = useRealtimeTable<Perfil>('perfis')
   const [actionError, setActionError] = useState<string | null>(null)
 
   const fail = useCallback((msg: string, e: unknown) => {
@@ -31,7 +33,7 @@ export function useData() {
     async (tipo: TipoChamada, day: string) => {
       const last = [...chamadas.rows]
         .reverse()
-        .find((c) => c.tipo === tipo && dayOf(c.created_at) === day)
+        .find((c) => c.user_id === userId && c.tipo === tipo && dayOf(c.created_at) === day)
       if (!last) return
       chamadas.removeLocal(last.id)
       const { error } = await supabase.from('chamadas').delete().eq('id', last.id)
@@ -40,7 +42,7 @@ export function useData() {
         fail('Não foi possível desfazer', error)
       }
     },
-    [chamadas.rows, chamadas.removeLocal, chamadas.upsertLocal, fail],
+    [chamadas.rows, chamadas.removeLocal, chamadas.upsertLocal, fail, userId],
   )
 
   const addPessoa = useCallback(
@@ -88,8 +90,9 @@ export function useData() {
   return {
     chamadas: chamadas.rows,
     pessoas: pessoas.rows,
-    loading: chamadas.loading || pessoas.loading,
-    loadError: chamadas.error ?? pessoas.error,
+    perfis: perfis.rows,
+    loading: chamadas.loading || pessoas.loading || perfis.loading,
+    loadError: chamadas.error ?? pessoas.error ?? perfis.error,
     actionError,
     clearActionError: () => setActionError(null),
     addChamada,

@@ -4,9 +4,12 @@ import type { Convertido, Status } from '../lib/types'
 interface Props {
   status: Status
   pessoas: Convertido[]
-  onAdd: () => void
+  /** Ausente quando se está vendo o painel de outra pessoa. */
+  onAdd?: () => void
   onStatus: (p: Convertido, s: Status) => void
   onRemove: (p: Convertido) => void
+  canEdit: (p: Convertido) => boolean
+  ownerName?: (p: Convertido) => string
 }
 
 const copy: Record<Status, { title: string; sub: string; add: string; empty: string }> = {
@@ -24,7 +27,7 @@ const copy: Record<Status, { title: string; sub: string; add: string; empty: str
   },
 }
 
-export function Pessoas({ status, pessoas, onAdd, onStatus, onRemove }: Props) {
+export function Pessoas({ status, pessoas, onAdd, onStatus, onRemove, canEdit, ownerName }: Props) {
   const c = copy[status]
   // Mais recentes primeiro.
   const lista = pessoas.filter((p) => p.status === status).reverse()
@@ -39,15 +42,24 @@ export function Pessoas({ status, pessoas, onAdd, onStatus, onRemove }: Props) {
           </h2>
           <p className="text-sm text-ink-2">{c.sub}</p>
         </div>
-        <button
-          type="button"
-          onClick={onAdd}
-          className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink transition hover:opacity-90"
-        >
-          {c.add}
-        </button>
+        {onAdd && (
+          <button
+            type="button"
+            onClick={onAdd}
+            className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink transition hover:opacity-90"
+          >
+            {c.add}
+          </button>
+        )}
       </div>
-      <PeopleTable people={lista} emptyText={c.empty} onStatus={onStatus} onRemove={onRemove} />
+      <PeopleTable
+        people={lista}
+        emptyText={c.empty}
+        onStatus={onStatus}
+        onRemove={onRemove}
+        canEdit={canEdit}
+        ownerName={ownerName}
+      />
     </div>
   )
 }

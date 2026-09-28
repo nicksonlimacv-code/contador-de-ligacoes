@@ -8,16 +8,22 @@ interface Props {
   onAdd: (tipo: TipoChamada) => void
   onUndo: (tipo: TipoChamada) => void
   onRegistrar: () => void
+  /** Quantas ligações de cada tipo o usuário logado tem no dia (o desfazer só remove as dele). */
+  minhas: Record<TipoChamada, number>
+  /** Nome de outra pessoa cujo painel está sendo visto: esconde os botões. */
+  vendo: string | null
+  /** Visão geral da equipe: avisa que os botões registram no nome do usuário. */
+  geral: boolean
 }
 
-function StatCard({ label, value, children }: { label: string; value: number; children: ReactNode }) {
+function StatCard({ label, value, children }: { label: string; value: number; children?: ReactNode }) {
   return (
     <div className="flex flex-col justify-between gap-5 rounded-2xl border border-line bg-surface p-5 shadow-card">
       <div>
         <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">{label}</p>
         <p className="mt-2 font-mono text-5xl font-semibold leading-none tabular">{value}</p>
       </div>
-      <div className="flex items-center gap-2">{children}</div>
+      {children && <div className="flex items-center gap-2">{children}</div>}
     </div>
   )
 }
@@ -45,7 +51,7 @@ function Rate({ label, num, den, hint }: { label: string; num: number; den: numb
   )
 }
 
-export function Contador({ stats, onAdd, onUndo, onRegistrar }: Props) {
+export function Contador({ stats, onAdd, onUndo, onRegistrar, minhas, vendo, geral }: Props) {
   const { feitas, atendidas, convertidas } = stats
 
   // Fatias mutuamente exclusivas que somam o total de ligações feitas.
@@ -57,29 +63,53 @@ export function Contador({ stats, onAdd, onUndo, onRegistrar }: Props) {
     { label: 'Converteu pro workshop', value: converteu, color: 'var(--pie-3)' },
   ]
 
+  const editavel = vendo === null
+
   return (
     <div className="space-y-6">
+      {(vendo || geral) && (
+        <p className="text-sm text-ink-2">
+          {vendo ? (
+            <>
+              Você está vendo os números de <strong className="text-ink">{vendo}</strong>. Para registrar, volte para a visão geral ou
+              para a sua.
+            </>
+          ) : (
+            'Números de toda a equipe. O que você registrar entra no seu nome.'
+          )}
+        </p>
+      )}
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Ligações feitas" value={feitas}>
-          <button type="button" className={primaryBtn} onClick={() => onAdd('feita')}>
-            +1
-          </button>
-          <button type="button" className={ghostBtn} onClick={() => onUndo('feita')} disabled={feitas === 0}>
-            desfazer
-          </button>
+          {editavel && (
+            <>
+              <button type="button" className={primaryBtn} onClick={() => onAdd('feita')}>
+                +1
+              </button>
+              <button type="button" className={ghostBtn} onClick={() => onUndo('feita')} disabled={minhas.feita === 0}>
+                desfazer
+              </button>
+            </>
+          )}
         </StatCard>
         <StatCard label="Ligações atendidas" value={atendidas}>
-          <button type="button" className={primaryBtn} onClick={() => onAdd('atendida')}>
-            +1
-          </button>
-          <button type="button" className={ghostBtn} onClick={() => onUndo('atendida')} disabled={atendidas === 0}>
-            desfazer
-          </button>
+          {editavel && (
+            <>
+              <button type="button" className={primaryBtn} onClick={() => onAdd('atendida')}>
+                +1
+              </button>
+              <button type="button" className={ghostBtn} onClick={() => onUndo('atendida')} disabled={minhas.atendida === 0}>
+                desfazer
+              </button>
+            </>
+          )}
         </StatCard>
         <StatCard label="Convertidas pro workshop" value={convertidas}>
-          <button type="button" className={`${primaryBtn} font-sans text-sm`} onClick={onRegistrar}>
-            + Registrar
-          </button>
+          {editavel && (
+            <button type="button" className={`${primaryBtn} font-sans text-sm`} onClick={onRegistrar}>
+              + Registrar
+            </button>
+          )}
         </StatCard>
       </div>
 
