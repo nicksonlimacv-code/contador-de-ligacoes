@@ -46,7 +46,7 @@ function Painel({ session }: { session: Session }) {
   const data = useData(me)
   const [tab, setTab] = useState<Tab>('contador')
   const [selectedDay, setSelectedDay] = useState(todayStr)
-  const [visao, setVisao] = useState<Visao>('geral')
+  const [visao, setVisao] = useState<Visao>(me)
   const [modalStatus, setModalStatus] = useState<Status | null>(null)
   const [, setTick] = useState(0)
 
@@ -58,9 +58,9 @@ function Painel({ session }: { session: Session }) {
 
   const nomes = useMemo(() => new Map(data.perfis.map((p) => [p.id, p.nome])), [data.perfis])
   const nomeDe = useCallback((id: string) => nomes.get(id) ?? '—', [nomes])
-  const outros = useMemo(
-    () => data.perfis.filter((p) => p.id !== me).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')),
-    [data.perfis, me],
+  const usuarios = useMemo(
+    () => [...data.perfis].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')),
+    [data.perfis],
   )
 
   const chamadas = useMemo(
@@ -141,22 +141,29 @@ function Painel({ session }: { session: Session }) {
             onChange={(e) => setVisao(e.target.value)}
             className="h-10 cursor-pointer appearance-none rounded-xl border border-line bg-surface pl-3 pr-9 text-sm font-medium text-ink focus-visible:outline-2 focus-visible:outline-accent"
           >
-            <option value="geral">Geral · equipe toda</option>
-            <option value={me}>Só eu</option>
-            {outros.length > 0 && (
-              <optgroup label="Por pessoa">
-                {outros.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nome}
-                  </option>
-                ))}
-              </optgroup>
-            )}
+            <option value="geral">Todos</option>
+            {usuarios.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.nome}
+              </option>
+            ))}
           </select>
           <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted" width="10" height="10" viewBox="0 0 10 10" aria-hidden>
             <path d="M2 3.5L5 6.5 8 3.5" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" />
           </svg>
         </div>
+        <button
+          type="button"
+          aria-pressed={visao === me}
+          onClick={() => setVisao(visao === me ? 'geral' : me)}
+          className={`h-10 rounded-xl border px-4 text-sm font-medium transition ${
+            visao === me
+              ? 'border-accent bg-accent text-accent-ink hover:opacity-90'
+              : 'border-line bg-surface text-ink-2 hover:border-accent hover:text-accent'
+          }`}
+        >
+          Só eu
+        </button>
       </div>
 
       {showDaySelector && (
