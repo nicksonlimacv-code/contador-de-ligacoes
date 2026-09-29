@@ -157,6 +157,11 @@ create policy "convertidos_update_own" on public.convertidos
 create policy "convertidos_delete_own" on public.convertidos
   for delete to authenticated using ((select auth.uid()) = user_id);
 
+-- Novo contador: não atendeu, mas a pessoa foi chamada no WhatsApp.
+alter table public.chamadas drop constraint if exists chamadas_tipo_check;
+alter table public.chamadas
+  add constraint chamadas_tipo_check check (tipo in ('feita', 'atendida', 'whatsapp'));
+
 do $$
 begin
   if not exists (

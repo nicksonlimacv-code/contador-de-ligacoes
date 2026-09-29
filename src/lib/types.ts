@@ -1,4 +1,5 @@
-export type TipoChamada = 'feita' | 'atendida'
+/** 'whatsapp' = não atendeu e a pessoa foi chamada no WhatsApp (contagem à parte das ligações). */
+export type TipoChamada = 'feita' | 'atendida' | 'whatsapp'
 export type Status = 'Interessado' | 'Agendado'
 
 export interface Perfil {

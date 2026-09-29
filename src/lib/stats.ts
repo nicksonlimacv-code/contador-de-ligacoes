@@ -4,6 +4,8 @@ import type { Chamada, Convertido } from './types'
 export interface DayStats {
   feitas: number
   atendidas: number
+  /** Não atenderam, mas foram chamadas no WhatsApp. */
+  whatsapp: number
   /** Pessoas com status Agendado registradas no dia. */
   convertidas: number
   pessoas: Convertido[]
@@ -13,15 +15,18 @@ export interface DayStats {
 export function statsForDay(chamadas: Chamada[], pessoas: Convertido[], day: string): DayStats {
   let feitas = 0
   let atendidas = 0
+  let whatsapp = 0
   for (const c of chamadas) {
     if (dayOf(c.created_at) !== day) continue
     if (c.tipo === 'feita') feitas++
-    else atendidas++
+    else if (c.tipo === 'atendida') atendidas++
+    else if (c.tipo === 'whatsapp') whatsapp++
   }
   const doDia = pessoas.filter((p) => dayOf(p.created_at) === day)
   return {
     feitas,
     atendidas,
+    whatsapp,
     convertidas: doDia.filter((p) => p.status === 'Agendado').length,
     pessoas: doDia,
   }

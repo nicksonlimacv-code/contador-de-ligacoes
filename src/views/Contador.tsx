@@ -52,7 +52,7 @@ function Rate({ label, num, den, hint }: { label: string; num: number; den: numb
 }
 
 export function Contador({ stats, onAdd, onUndo, onRegistrar, minhas, vendo, geral }: Props) {
-  const { feitas, atendidas, convertidas } = stats
+  const { feitas, atendidas, whatsapp, convertidas } = stats
 
   // Fatias mutuamente exclusivas que somam o total de ligações feitas.
   const atendidasCap = Math.min(atendidas, feitas)
@@ -79,7 +79,7 @@ export function Contador({ stats, onAdd, onUndo, onRegistrar, minhas, vendo, ger
           )}
         </p>
       )}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Ligações feitas" value={feitas}>
           {editavel && (
             <>
@@ -99,6 +99,18 @@ export function Contador({ stats, onAdd, onUndo, onRegistrar, minhas, vendo, ger
                 +1
               </button>
               <button type="button" className={ghostBtn} onClick={() => onUndo('atendida')} disabled={minhas.atendida === 0}>
+                desfazer
+              </button>
+            </>
+          )}
+        </StatCard>
+        <StatCard label="Não atendeu · chamei no WhatsApp" value={whatsapp}>
+          {editavel && (
+            <>
+              <button type="button" className={primaryBtn} onClick={() => onAdd('whatsapp')}>
+                +1
+              </button>
+              <button type="button" className={ghostBtn} onClick={() => onUndo('whatsapp')} disabled={minhas.whatsapp === 0}>
                 desfazer
               </button>
             </>

@@ -75,7 +75,7 @@ function Painel({ session }: { session: Session }) {
   const stats = useMemo(() => statsForDay(chamadas, pessoas, selectedDay), [chamadas, pessoas, selectedDay])
   const recentDays = useMemo(() => daysWithRecords(chamadas, pessoas, 14), [chamadas, pessoas])
   const minhas = useMemo(() => {
-    const n = { feita: 0, atendida: 0 }
+    const n = { feita: 0, atendida: 0, whatsapp: 0 }
     for (const c of data.chamadas) if (c.user_id === me && dayOf(c.created_at) === selectedDay) n[c.tipo]++
     return n
   }, [data.chamadas, me, selectedDay])

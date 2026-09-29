@@ -26,9 +26,10 @@ export function Datas({ day, stats, recentDays, onPick, ownerName }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Mini label="Ligações feitas" value={stats.feitas} />
         <Mini label="Ligações atendidas" value={stats.atendidas} />
+        <Mini label="Chamei no WhatsApp" value={stats.whatsapp} />
         <Mini label="Agendamentos" value={stats.convertidas} />
       </div>
 
